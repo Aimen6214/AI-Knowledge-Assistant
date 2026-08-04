@@ -150,11 +150,17 @@ def continue_chat(
     )
 
     # Generate response
-    answer = generate_response(
-        question=request.question,
-        documents=documents,
-        chat_history=chat_history
-    )
+    try:
+        answer = generate_response(
+            question=request.question,
+            documents=documents,
+            chat_history=chat_history
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail="The AI service is currently experiencing high traffic. Please try again in a few moments."
+        )
 
     # Save assistant response
     save_message(
