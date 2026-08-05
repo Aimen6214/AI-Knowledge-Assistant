@@ -1,18 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api import documents
 from auth.dependencies import get_current_user
 from database.dependencies import get_db
 
 from models.users import User
 
 from schemas.chat import ChatRequest, ChatResponse
+from schemas.conversation import ConversationSummaryResponse
+from schemas.messages import MessageResponse
 
 from services.retriever import retrieve_documents
 from services.chat_service import generate_response
 from services.conversation import save_conversation, get_conversation_by_id, get_conversations_by_user, delete_conversation
 from services.message_service import save_message, get_messages
+from services.source_docs import get_source_documents
 
 router = APIRouter(
     prefix="/chat",
@@ -75,25 +77,7 @@ def new_chat(
     )
 
     # Extract source documents
-    source_documents = []   
-
-    seen = set()
-
-    for doc in documents:
-        document_id = doc.metadata.get("document_id")
-        file_name = doc.metadata.get("file_name", "Unknown")
-
-        # avoid duplicate documents
-        if document_id not in seen:
-            source_documents.append(
-                {
-                    "document_id": document_id,
-                    "file_name": file_name
-                }
-            )
-
-            seen.add(document_id)
-
+    source_documents = get_source_documents(documents)
     return ChatResponse(
         answer=answer,
         source_documents=source_documents
@@ -156,7 +140,7 @@ def continue_chat(
             documents=documents,
             chat_history=chat_history
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=503,
             detail="The AI service is currently experiencing high traffic. Please try again in a few moments."
@@ -170,15 +154,7 @@ def continue_chat(
         content=answer
     )
 
-    source_documents = []
-
-    for doc in documents:
-        source_documents.append(
-            doc.metadata.get(
-                "file_name",
-                "Unknown"
-            )
-        )
+    source_documents = get_source_documents(documents)
 
     return ChatResponse(
         answer=answer,
@@ -188,7 +164,7 @@ def continue_chat(
 #HISTORY OF CONVERSATIONS
 @router.get(
     "/history",
-    response_model=list[dict]
+    response_model=list[ConversationSummaryResponse]
 )
 def history(
     db: Session = Depends(get_db),
@@ -203,7 +179,7 @@ def history(
 #get messages of a conversation
 @router.get(
     "/{conversation_id}",
-    response_model=list[dict]
+    response_model=list[MessageResponse]
 )
 def get_conversation(
     conversation_id: int,
@@ -227,8 +203,11 @@ def get_conversation(
             detail="Access denied."
         )
 
-    
-    return conversation
+    messages=get_messages(
+        db=db,
+        conversation_id=conversation.id
+    )
+    return messages
 
 #Delete a conversation
 @router.delete(

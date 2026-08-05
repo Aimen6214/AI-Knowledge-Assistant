@@ -10,7 +10,7 @@ from services.doc_loader import load_document
 from services.chunking import chunk_documents
 from services.save_chunks import save_chunks_to_db
 from services.embedding import get_embeddings
-from services.vector_db import create_chroma_db
+from services.vector_db import create_chroma_db, delete_from_chroma_db
 
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
@@ -40,6 +40,8 @@ async def upload_doc(file: UploadFile = File(...), current_user: User = Depends(
         chunk.metadata["chunk_id"] = index
         chunk.metadata["user_id"] = current_user.id
         chunk.metadata["file_name"] = file.filename
+        chunk.metadata["page"] = chunk.metadata.get("page", 0) + 1
+        chunk.metadata["file_type"] = file.content_type
     # Save chunks to database
     save_chunks_to_db(chunks, new_document.id, db)
 
@@ -68,8 +70,13 @@ def delete_document(document_id: int, db: Session = Depends(get_db), current_use
     document = db.query(Document).filter(Document.id == document_id, Document.user_id == current_user.id).first()
     if not document:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+
     if os.path.exists(document.file_path):
         os.remove(document.file_path)
+
+    delete_from_chroma_db(document_id)
+    
     db.delete(document)
     db.commit()
     return {"detail": "Document deleted successfully."}
