@@ -1,6 +1,8 @@
 import streamlit as st
 from api.auth import login
 from utils.helpers import handle_response
+from utils.session import login_user  # 👈 ADDED THIS IMPORT
+
 
 def login_page():
     # Header & Branding (Centered, no anchor links)
@@ -29,13 +31,17 @@ def login_page():
                 response = login(email, password)
                 data = handle_response(response)
                 if data:
-                    st.session_state.token = data.get("access_token")
+                    token = data.get("access_token")
+                    
+                    # ✅ FIXED: Use login_user() so query params are saved in URL for F5 persistence
+                    login_user(token)
                     st.rerun()
 
-    # Handle inline query navigation (No extra full-width button!)
+    # Handle inline query navigation (Only delete 'nav' query param, don't clear all query params)
     if st.query_params.get("nav") == "register":
         st.session_state.auth_mode = "register"
-        st.query_params.clear()
+        if "nav" in st.query_params:
+            del st.query_params["nav"]
         st.rerun()
 
     # Clean bottom link

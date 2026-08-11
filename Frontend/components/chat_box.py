@@ -12,7 +12,15 @@ from components.message import render_message
 def show_chat_box(chat_container):
     token = get_token()
 
-    # Direct column layout without invalid HTML div wrappers
+    # -------------------------------------------------------------------------
+    # 1. AUTO-DETECT PENDING / UNANSWERED USER PROMPT
+    # -------------------------------------------------------------------------
+    pending_prompt = None
+    if st.session_state.messages and st.session_state.messages[-1].get("role") == "user":
+        # The last message is from the user and has no AI response yet
+        pending_prompt = st.session_state.messages[-1].get("content")
+
+    # Document upload popover and Chat Input Layout
     input_col1, input_col2 = st.columns([1, 11], vertical_alignment="center")
 
     with input_col1:
@@ -42,6 +50,8 @@ def show_chat_box(chat_container):
                         st.session_state.upload_success = True
                         st.session_state.messages = []
                         st.session_state.conversation_id = None
+                        if "cid" in st.query_params:
+                            del st.query_params["cid"]
                         st.success("✅ Document uploaded successfully.")
                     else:
                         st.warning("⚠️ Upload did not complete. Please try again.")
@@ -49,37 +59,61 @@ def show_chat_box(chat_container):
     with input_col2:
         question = st.chat_input("Message SAFE AI...", key="main_chat_input")
 
-    if not question:
+    # Determine prompt to process: either fresh input OR pending unanswered prompt on reload
+    prompt_to_process = question or pending_prompt
+
+    if not prompt_to_process:
         return None
 
-    # Append user message
+    # If user typed a NEW question, format reply quote & append to session state
+    if question:
+        final_question = question
+        if st.session_state.get("reply_to"):
+            final_question = f"> Replying to: \"{st.session_state.reply_to}\"\n\n{question}"
+            st.session_state.reply_to = None
+
+        prompt_to_process = final_question
+        st.session_state.messages.append({"role": "user", "content": prompt_to_process})
+
+    # -------------------------------------------------------------------------
+    # 2. CALL AI API (Auto-executes on F5 / Refresh if prompt is unanswered)
+    # -------------------------------------------------------------------------
     st.session_state["busy_state"] = "chat"
     st.session_state["busy_text"] = "Thinking..."
-    st.session_state.messages.append({"role": "user", "content": question})
 
-    # Render inside top container
+    data = None
     with chat_container:
-        render_message(st.session_state.messages[-1])
-
         with st.spinner("Thinking..."):
-            if st.session_state.conversation_id is None:
-                response = new_chat(question, token)
-            else:
-                response = continue_chat(st.session_state.conversation_id, question, token)
+            try:
+                if st.session_state.conversation_id is None:
+                    response = new_chat(prompt_to_process, token)
+                else:
+                    response = continue_chat(st.session_state.conversation_id, prompt_to_process, token)
 
-            data = handle_response(response)
+                data = handle_response(response)
+            except Exception as err:
+                st.error(f"⚠️ Connection Error: {str(err)}")
+                data = None
 
     st.session_state["busy_state"] = None
     st.session_state["busy_text"] = None
 
+    # Handle error or retry
     if not data:
-        st.session_state.messages.pop()
-        st.error("Failed to fetch response.")
+        st.error("⚠️ AI failed to respond or connection timed out.")
+        col_retry, _ = st.columns([2, 8])
+        with col_retry:
+            if st.button("⚡ Retry Prompt", key="retry_failed_prompt"):
+                st.rerun()
         return None
 
+    # Update conversation ID and URL parameters
     if st.session_state.conversation_id is None:
-        st.session_state.conversation_id = data["conversation_id"]
+        st.session_state.conversation_id = data.get("conversation_id")
+        if data.get("conversation_id"):
+            st.query_params["cid"] = data["conversation_id"]
 
+    # Append AI response to chat history
     assistant_message = {
         "role": "assistant",
         "content": data["answer"],

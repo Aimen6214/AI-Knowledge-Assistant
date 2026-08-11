@@ -6,7 +6,7 @@ def retrieve_documents(
     user_id,
     document_id=None,
     vector_db="./chroma.db",
-    k=4
+    k=10
 ):
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
@@ -34,5 +34,18 @@ def retrieve_documents(
                 "user_id": user_id
             }
         )
+        
+
+    print("\n========== RETRIEVED CHUNKS ==========")
+
+    for i, doc in enumerate(results):
+        print(f"\n--- CHUNK {i + 1} ---")
+        print("METADATA:", doc.metadata)
+        print("CONTENT:")
+        print(doc.page_content[:1500])
+
+    print("======================================\n")
+
+
 
     return results
