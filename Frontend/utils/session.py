@@ -7,8 +7,6 @@ import streamlit as st
 
 def login_user(token):
     st.session_state.token = token
-    # Store token in URL query params so F5 reloads don't log you out
-    st.query_params["token"] = token
 
 
 # -------------------------
@@ -24,17 +22,7 @@ def set_session(token):
 # -------------------------
 
 def get_token():
-    # 1. Check in-memory session state first
-    if st.session_state.get("token"):
-        return st.session_state.token
-
-    # 2. Recover from browser query params if user pressed F5
-    token_param = st.query_params.get("token")
-    if token_param:
-        st.session_state.token = token_param
-        return token_param
-
-    return None
+    return st.session_state.get("token")
 
 
 # -------------------------
@@ -65,11 +53,9 @@ def is_logged_in():
 # -------------------------
 
 def initialize_session():
-    # Auto-recover token on browser reload
-    token_from_url = st.query_params.get("token")
 
-    if "token" not in st.session_state or st.session_state.token is None:
-        st.session_state.token = token_from_url
+    if "token" not in st.session_state:
+        st.session_state.token = None
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -86,6 +72,7 @@ def initialize_session():
 # -------------------------
 
 def logout():
+
     keys = [
         "token",
         "messages",
@@ -96,7 +83,3 @@ def logout():
     for key in keys:
         if key in st.session_state:
             del st.session_state[key]
-
-    # Remove token from URL on explicit logout
-    if "token" in st.query_params:
-        del st.query_params["token"]

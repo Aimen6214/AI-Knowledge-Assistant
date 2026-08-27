@@ -8,12 +8,17 @@ from models.users import User
 
 from schemas.chat import ChatRequest, ChatResponse
 from schemas.conversation import ConversationSummaryResponse, ConversationResponse
-from schemas.messages import MessageResponse
 
 from services.convo_title import generate_title
 from services.retriever import retrieve_documents
 from services.chat_service import generate_response
-from services.conversation import save_conversation, get_conversation_by_id, get_conversations_by_user, delete_conversation, search_conversations
+from services.conversation import (
+    save_conversation,
+    get_conversation_by_id,
+    get_conversations_by_user,
+    delete_conversation,
+    search_conversations,
+)
 from services.message_service import save_message, get_messages
 from services.source_docs import get_source_documents
 
@@ -22,6 +27,10 @@ router = APIRouter(
     tags=["Chat"]
 )
 
+
+# -----------------------------------------------------------------------------
+# NEW CONVERSATION
+# -----------------------------------------------------------------------------
 @router.post(
     "/new",
     response_model=ChatResponse
@@ -31,66 +40,87 @@ def new_chat(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
+    # 1. Generate Title
     try:
         update_title = generate_title(request.question)
     except Exception as e:
         print("TITLE GENERATION ERROR:", e)
         update_title = "New Chat"
-    # Create conversation
+
+    # 2. Create Conversation Record
     conversation = save_conversation(
         db=db,
         user_id=current_user.id,
         title=update_title
     )
 
-    # Save user's first message
-    save_message(
-        db=db,
-        conversation_id=conversation.id,
-        role="user",
-        content=request.question
-    )
+    # 3. Process LLM request & auto-cleanup on failure
+    try:
+        # Save User Message
+        save_message(
+            db=db,
+            conversation_id=conversation.id,
+            role="user",
+            content=request.question
+        )
 
-    # Retrieve relevant document chunks
-    documents = retrieve_documents(
-        question=request.question,
-        user_id=current_user.id
-    )
+        # Retrieve Documents
+        documents = retrieve_documents(
+            question=request.question,
+            user_id=current_user.id
+        )
 
-    # Load chat history
-    chat_history = get_messages(
-        db=db,
-        conversation_id=conversation.id
-    )
+        # Load Chat History
+        chat_history = get_messages(
+            db=db,
+            conversation_id=conversation.id
+        )
 
-    # Generate AI response
-    answer = generate_response(
-        question=request.question,
-        documents=documents,
-        chat_history=chat_history
-    )
+        # Generate AI Response
+        answer = generate_response(
+            question=request.question,
+            documents=documents,
+            chat_history=chat_history
+        )
 
-    if isinstance(answer, list):
-        answer = answer[0]["text"]
+        if isinstance(answer, list):
+            answer = answer[0]["text"]
 
-    # Save assistant reply
-    save_message(
-        db=db,
-        conversation_id=conversation.id,
-        role="assistant",
-        content=answer
-    )
+        # Save Assistant Reply
+        save_message(
+            db=db,
+            conversation_id=conversation.id,
+            role="assistant",
+            content=answer
+        )
 
-    # Extract source documents
-    source_documents = get_source_documents(documents)
-    return ChatResponse(
-        conversation_id=conversation.id,
-        answer=answer,
-        source_documents=source_documents
-    )
+        source_documents = get_source_documents(documents)
 
-#Continue Existing Conversation
+        return ChatResponse(
+            conversation_id=conversation.id,
+            answer=answer,
+            source_documents=source_documents
+        )
 
+    except Exception as err:
+        # AUTO-CLEANUP: If AI response fails, roll back & delete the empty chat record
+        db.rollback()
+        delete_conversation(
+            db=db,
+            conversation_id=conversation.id,
+            user_id=current_user.id
+        )
+        print(f"NEW CHAT GENERATION ERROR: {err}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The AI service is currently experiencing high traffic or timed out. Please try again."
+        )
+
+
+# -----------------------------------------------------------------------------
+# CONTINUE EXISTING CONVERSATION
+# -----------------------------------------------------------------------------
 @router.post(
     "/{conversation_id}",
     response_model=ChatResponse
@@ -109,17 +139,17 @@ def continue_chat(
 
     if not conversation:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Conversation not found."
         )
 
     if conversation.user_id != current_user.id:
         raise HTTPException(
-            status_code=403,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied."
         )
 
-    # Save user's message
+    # Save user message
     save_message(
         db=db,
         conversation_id=conversation.id,
@@ -127,13 +157,13 @@ def continue_chat(
         content=request.question
     )
 
-    # Retrieve document chunks
+    # Retrieve docs
     documents = retrieve_documents(
         question=request.question,
         user_id=current_user.id
     )
 
-    # Load previous messages
+    # Load history
     chat_history = get_messages(
         db=db,
         conversation_id=conversation.id
@@ -146,14 +176,16 @@ def continue_chat(
             documents=documents,
             chat_history=chat_history
         )
-    except Exception:
+    except Exception as err:
+        print(f"CONTINUE CHAT GENERATION ERROR: {err}")
         raise HTTPException(
-            status_code=503,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The AI service is currently experiencing high traffic. Please try again in a few moments."
         )
 
     if isinstance(answer, list):
         answer = answer[0]["text"]
+
     # Save assistant response
     save_message(
         db=db,
@@ -170,37 +202,43 @@ def continue_chat(
         source_documents=source_documents
     )
 
-#rename conversation title
+
+# -----------------------------------------------------------------------------
+# RENAME CONVERSATION
+# -----------------------------------------------------------------------------
 @router.post(
     "/{conversation_id}/title",
     response_model=ConversationResponse
 )
 def rename_chat(
     conversation_id: int,
-    title : str,
-    db : Session=Depends(get_db),
-    current_user:User= Depends(get_current_user)
+    title: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    conversation = get_conversation_by_id(db,conversation_id)
+
+    conversation = get_conversation_by_id(db, conversation_id)
 
     if not conversation:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Conversation not found."
         )
 
-    if conversation.user_id!=current_user.id:
+    if conversation.user_id != current_user.id:
         raise HTTPException(
-                    status_code=403,
-                    detail="Access denied."
-                )
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied."
+        )
 
-    conversation.title=title
+    conversation.title = title
     db.commit()
     return conversation
 
 
-#HISTORY OF CONVERSATIONS
+# -----------------------------------------------------------------------------
+# HISTORY OF CONVERSATIONS
+# -----------------------------------------------------------------------------
 @router.get(
     "/history",
     response_model=list[ConversationSummaryResponse]
@@ -209,31 +247,37 @@ def history(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
     conversations = get_conversations_by_user(
         db=db,
         user_id=current_user.id
     )
     return conversations
 
-#search messages
+
+
+# SEARCH MESSAGES
 @router.get(
     "/search",
     response_model=list[ConversationSummaryResponse]
 )
 def search_messages(
-    query:str,
-    db:Session=Depends(get_db),
-    current_user:User=Depends(get_current_user)
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    conversation=search_conversations(
+
+    conversations = search_conversations(
         db,
         current_user.id,
         query
     )
+    return conversations
 
-    return conversation
 
-#get messages of a conversation
+# -----------------------------------------------------------------------------
+# GET CONVERSATION BY ID
+# -----------------------------------------------------------------------------
 @router.get(
     "/{conversation_id}",
     response_model=ConversationResponse
@@ -243,6 +287,7 @@ def get_conversation(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
     conversation = get_conversation_by_id(
         db=db,
         conversation_id=conversation_id
@@ -250,25 +295,22 @@ def get_conversation(
 
     if not conversation:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Conversation not found."
         )
 
     if conversation.user_id != current_user.id:
         raise HTTPException(
-            status_code=403,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied."
         )
 
-#    messages=get_messages(
-#        db=db,
-#        conversation_id=conversation.id
-#   )
     return conversation
 
 
-
-#Delete a conversation
+# -----------------------------------------------------------------------------
+# DELETE CONVERSATION
+# -----------------------------------------------------------------------------
 @router.delete(
     "/{conversation_id}",
     status_code=status.HTTP_204_NO_CONTENT
@@ -278,6 +320,7 @@ def delete_conversation_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
     success = delete_conversation(
         db=db,
         conversation_id=conversation_id,
@@ -286,9 +329,6 @@ def delete_conversation_endpoint(
 
     if not success:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Conversation not found or access denied."
         )
-
-    
-

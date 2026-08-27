@@ -1,7 +1,7 @@
 import requests
 import streamlit as st
 
-from config import API_URL
+from config import BASE_URL
 
 
 
@@ -32,9 +32,8 @@ def login(email, password):
     return requests.post(url, data=data)
 
 
-# ---------------------------
+
 # Headers
-# ---------------------------
 
 def get_headers():
     return {
@@ -42,9 +41,9 @@ def get_headers():
     }
 
 
-# ---------------------------
+
 # Documents
-# ---------------------------
+
 
 def upload_document(file):
     url = f"{BASE_URL}/documents/upload"
@@ -82,9 +81,7 @@ def delete_document(document_id):
     )
 
 
-# ---------------------------
 # Chat
-# ---------------------------
 
 def new_chat(question):
     url = f"{BASE_URL}/chat/new"

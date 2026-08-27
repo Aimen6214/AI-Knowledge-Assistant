@@ -2,7 +2,12 @@
 def build_prompt(question, documents, chat_history=None):
     context = ""
     for doc in documents:
-        context+=doc.page_content + "\n"
+        # print(doc)
+        # if hasattr(doc, "page_content"):
+        #     context+=doc.page_content + "\n"
+        # else:
+        #     context+= "\n"
+        context+=doc
 
     history_text = ""
     for message in chat_history:
@@ -22,7 +27,7 @@ If the answer is not available in the context, reply:
 
 "I couldn't find that information in the uploaded documents."
 
-Always give a clear and concise answer.
+Always give a clear and complete answer.
 
 
 

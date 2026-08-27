@@ -1,279 +1,221 @@
 /* ==========================================================================
    1. GLOBAL RESET & BASE STYLES
    ========================================================================== */
-html, body, .stApp {
+
+html,
+body,
+.stApp {
     background-color: #f8fafc !important;
     color: #0f172a !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+
     height: 100vh !important;
+
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* Nuke top Streamlit header bar & toolbar completely */
+
+/* ==========================================================================
+   STREAMLIT HEADER / TOOLBAR
+   ========================================================================== */
+
 header[data-testid="stHeader"],
 [data-testid="stHeader"],
 div[data-testid="stToolbar"],
 footer {
     display: none !important;
-    height: 0px !important;
+    height: 0 !important;
 }
 
-[data-testid="stHeaderActionElements"], .aria-hidden {
+
+[data-testid="stHeaderActionElements"],
+.aria-hidden {
     display: none !important;
 }
 
-/* Base Container Spacing */
+
+/* ==========================================================================
+   MAIN CONTAINER
+   ========================================================================== */
+
 [data-testid="stMainBlockContainer"],
 .main .block-container {
     max-width: 800px !important;
     margin: 0 auto !important;
 }
 
+
 /* ==========================================================================
-   2. AUTH PAGES (Login / Signup - Zero Scroll & Vertically Centered)
+   2. AUTH PAGES — LOGIN / REGISTER
    ========================================================================== */
 
-/* Disable scrolling on Streamlit's actual scroll container during auth */
+/* Center login/register page */
+
 .stApp:has(div[data-testid="stForm"]) section[data-testid="stMain"],
 .stApp:has(div[data-testid="stForm"]) section.main {
     overflow: hidden !important;
+
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
+
     height: 100vh !important;
+
     margin-left: 0 !important;
+
     width: 100vw !important;
 }
 
-/* Hide sidebar completely when on Auth/Login screens */
+
+/* Hide sidebar on login/register */
+
 .stApp:has(div[data-testid="stForm"]) section[data-testid="stSidebar"] {
     display: none !important;
 }
 
-/* Remove main container padding on Auth screen */
-.stApp:has(div[data-testid="stForm"]) [data-testid="stMainBlockContainer"] {
+
+/* Remove main container padding */
+
+.stApp:has(div[data-testid="stForm"])
+[data-testid="stMainBlockContainer"] {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
 
-/* Reduce tight vertical gaps between elements on Auth screen */
-.stApp:has(div[data-testid="stForm"]) div[data-testid="stVerticalBlock"] {
+
+/* Compact vertical spacing */
+
+.stApp:has(div[data-testid="stForm"])
+div[data-testid="stVerticalBlock"] {
     gap: 0.4rem !important;
 }
 
-/* Auth Header Typography */
+
+/* Auth heading */
+
 .stApp:has(div[data-testid="stForm"]) h1 {
     font-size: 1.8rem !important;
     font-weight: 700 !important;
+
     margin-top: 0 !important;
     margin-bottom: 0.1rem !important;
 }
 
+
+/* Auth paragraph */
+
 .stApp:has(div[data-testid="stForm"]) p {
     color: #64748b !important;
+
     font-size: 0.9rem !important;
+
     margin-bottom: 0.4rem !important;
 }
 
-/* Compact Auth Form Card */
-div[data-testid="stForm"] {
-    max-width: 400px !important;
-    margin: 0 auto !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 16px !important;
-    padding: 1.2rem 1.5rem !important;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+
+/* ==========================================================================
+   AUTH BUTTON TEXT
+   ========================================================================== */
+
+.stApp:has(div[data-testid="stForm"])
+div[data-testid="stForm"] button p,
+
+.stApp:has(div[data-testid="stForm"])
+div[data-testid="stForm"] button * {
+    color: #ffffff !important;
 }
 
-/* Reduce input field margins */
-div[data-testid="stForm"] [data-testid="stTextInput"] {
+
+/* ==========================================================================
+   AUTH FORM CARD
+   ========================================================================== */
+
+div[data-testid="stForm"] {
+    max-width: 400px !important;
+
+    margin: 0 auto !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e2e8f0 !important;
+
+    border-radius: 16px !important;
+
+    padding: 1.2rem 1.5rem !important;
+
+    box-shadow:
+        0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+
+/* ==========================================================================
+   AUTH INPUTS
+   ========================================================================== */
+
+div[data-testid="stForm"]
+[data-testid="stTextInput"] {
     margin-bottom: 0.3rem !important;
 }
 
-/* Primary Blue Button */
+
+/* ==========================================================================
+   AUTH PRIMARY BUTTON
+   ========================================================================== */
+
 div[data-testid="stForm"] button {
     background-color: #2563eb !important;
+
     color: #ffffff !important;
+
     border: none !important;
+
     border-radius: 10px !important;
+
     height: 40px !important;
+
     font-weight: 600 !important;
+
     font-size: 0.9rem !important;
+
     margin-top: 0.4rem !important;
+
     transition: background-color 0.2s ease !important;
 }
+
 
 div[data-testid="stForm"] button:hover {
     background-color: #1d4ed8 !important;
 }
 
-/* Auth links */
+
+/* ==========================================================================
+   AUTH LINKS
+   ========================================================================== */
+
 a.auth-link {
     color: #2563eb !important;
+
     font-weight: 600 !important;
+
     text-decoration: none !important;
 }
+
 
 a.auth-link:hover {
     text-decoration: underline !important;
 }
 
-/* ==========================================================================
-   3. PERMANENTLY LOCKED SIDEBAR / DASHBOARD
-   ========================================================================== */
-
-/* Hide all collapse / expand controls */
-button[data-testid="stSidebarCollapseButton"],
-div[data-testid="stSidebarCollapsedControl"],
-[data-testid="collapsedControl"],
-button[aria-label="Close sidebar"],
-button[aria-label="Open sidebar"] {
-    display: none !important;
-}
-
-/* Force the sidebar to stay open permanently */
-section[data-testid="stSidebar"] {
-    display: flex !important;
-    visibility: visible !important;
-    transform: none !important;
-    margin-left: 0 !important;
-    width: 280px !important;
-    min-width: 280px !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    z-index: 100 !important;
-    background-color: #f1f5f9 !important;
-    border-right: 1px solid #e2e8f0 !important;
-}
-
-section[data-testid="stSidebar"] > div:first-child {
-    padding-top: 1rem !important;
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-}
-
-section[data-testid="stSidebar"] .stButton > button {
-    border-radius: 10px !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    font-weight: 500 !important;
-}
-
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: #f8fafc !important;
-    border-color: #94a3b8 !important;
-}
-
-/* Offset main section to sit right beside fixed 280px sidebar */
-section[data-testid="stMain"] {
-    margin-left: 280px !important;
-    width: calc(100vw - 280px) !important;
-}
 
 /* ==========================================================================
-   4. CHAT PAGE STYLING & FIXED CHATBAR
+   3. PERMANENT SIDEBAR
    ========================================================================== */
 
-/* Enable scroll on main chat area */
-.stApp:has(div[data-testid="stChatInput"]) section[data-testid="stMain"] {
-    overflow-y: auto !important;
-}
+/*
+   Hide ALL Streamlit sidebar collapse controls.
+   This keeps the sidebar permanently visible.
+*/
 
-/* Bottom padding for chat messages */
-.stApp:has(div[data-testid="stChatInput"]) .main .block-container {
-    padding-top: 1.5rem !important;
-    padding-bottom: 5.5rem !important;
-}
-
-/* Fixed Bottom Chatbar (Centered relative to remaining space) */
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stChatInput"]) {
-    position: fixed !important;
-    bottom: 1.2rem !important;
-    left: calc(280px + (100vw - 280px) / 2) !important;
-    transform: translateX(-50%) !important;
-    width: 90% !important;
-    max-width: 760px !important;
-    z-index: 9999 !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08) !important;
-    padding: 0.2rem 0.5rem !important;
-    align-items: center !important;
-}
-
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stChatInput"]) div[data-testid="stChatInput"] {
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-}
-
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stChatInput"]) div[data-testid="stChatInput"] > div {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-}
-
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stChatInput"]) div[data-testid="stPopover"] button {
-    border: none !important;
-    background: #f1f5f9 !important;
-    border-radius: 50% !important;
-    width: 36px !important;
-    height: 36px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* ==========================================================================
-   5. EMPTY STATE PROMPTS
-   ========================================================================== */
-.empty-state {
-    margin-top: 1.5rem !important;
-    text-align: left;
-}
-
-.empty-state h1 {
-    font-size: 1.8rem !important;
-    font-weight: 700 !important;
-    color: #0f172a !important;
-    margin-bottom: 0.3rem !important;
-}
-
-.empty-state p {
-    color: #64748b !important;
-    font-size: 0.95rem !important;
-    margin-bottom: 1rem !important;
-}
-
-.empty-prompt-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.8rem;
-}
-
-.empty-prompt {
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #2563eb;
-    font-size: 0.85rem;
-    font-weight: 500;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-/* ==========================================================================
-   3. PERMANENTLY LOCKED SIDEBAR & REMOVE TOP EMPTY SPACE
-   ========================================================================== */
-
-/* Nuke the top sidebar header container entirely (removes arrow & empty space) */
 [data-testid="stSidebarHeader"],
 button[data-testid="stSidebarCollapseButton"],
 div[data-testid="stSidebarCollapsedControl"],
@@ -282,128 +224,750 @@ button[aria-label="Close sidebar"],
 button[aria-label="Open sidebar"],
 button[aria-label="Collapse sidebar"] {
     display: none !important;
-    height: 0px !important;
-    min-height: 0px !important;
+
+    height: 0 !important;
+
+    min-height: 0 !important;
+
     padding: 0 !important;
+
     margin: 0 !important;
 }
 
-/* Force the sidebar section to remain expanded and fixed */
+
+/* ==========================================================================
+   SIDEBAR ITSELF
+   ========================================================================== */
+
 section[data-testid="stSidebar"] {
+
     display: flex !important;
+
     visibility: visible !important;
+
     transform: none !important;
+
     margin-left: 0 !important;
+
     width: 280px !important;
+
     min-width: 280px !important;
+
+    max-width: 280px !important;
+
     position: fixed !important;
+
     top: 0 !important;
+
     left: 0 !important;
+
     bottom: 0 !important;
+
+    height: 100vh !important;
+
     z-index: 100 !important;
+
     background-color: #f1f5f9 !important;
+
     border-right: 1px solid #e2e8f0 !important;
 }
 
-/* Eliminate top padding so "SAFE AI" sits cleanly at the top */
-section[data-testid="stSidebar"] > div:first-child,
-div[data-testid="stSidebarUserContent"] {
+
+/* ==========================================================================
+   SIDEBAR INNER WRAPPER
+   ========================================================================== */
+
+/*
+   IMPORTANT:
+
+   The sidebar itself does NOT scroll.
+
+   This allows us to have:
+       - fixed top section
+       - scrollable chat section
+       - fixed bottom section
+*/
+
+section[data-testid="stSidebar"] > div:first-child {
+
+    position: relative !important;
+
+    height: 100vh !important;
+
+    max-height: 100vh !important;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box !important;
+
     padding-top: 1rem !important;
+
     padding-left: 0.75rem !important;
+
     padding-right: 0.75rem !important;
+
+    padding-bottom: 120px !important;
 }
 
-section[data-testid="stSidebar"] .stButton > button {
-    border-radius: 10px !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
+
+/* ==========================================================================
+   SIDEBAR USER CONTENT
+   ========================================================================== */
+
+div[data-testid="stSidebarUserContent"] {
+
+    height: 100% !important;
+
+    max-height: 100% !important;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box !important;
+
+    padding-top: 0 !important;
+
+    padding-left: 0 !important;
+
+    padding-right: 0 !important;
+}
+
+
+/* ==========================================================================
+   SIDEBAR BRAND
+   ========================================================================== */
+
+.safe-ai-brand {
+
+    font-size: 1.25rem !important;
+
+    font-weight: 700 !important;
+
     color: #0f172a !important;
+
+    padding: 0.2rem 0.25rem 0.8rem 0.25rem !important;
+}
+
+
+/* ==========================================================================
+   SIDEBAR GENERAL BUTTONS
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.stButton > button {
+
+    border-radius: 10px !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    background: #ffffff !important;
+
+    color: #0f172a !important;
+
     font-weight: 500 !important;
 }
 
-section[data-testid="stSidebar"] .stButton > button:hover {
+
+section[data-testid="stSidebar"]
+.stButton > button:hover {
+
     background: #f8fafc !important;
+
     border-color: #94a3b8 !important;
 }
 
-/* Offset main section to sit right beside fixed 280px sidebar */
-section[data-testid="stMain"] {
-    margin-left: 280px !important;
-    width: calc(100vw - 280px) !important;
-}
 
 /* ==========================================================================
-   FIX SIDEBAR DOCUMENT ITEM & DUSTBIN BUTTON OVERFLOW
+   4. SCROLLABLE CHAT AREA
    ========================================================================== */
 
-/* 1. Prevent column layouts in sidebar from overflowing horizontally */
-section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
-    gap: 0.3rem !important;
-    align-items: center !important;
+/*
+   THIS IS THE IMPORTANT PART.
+
+   Only this container scrolls.
+
+   sidebar.py:
+       st.sidebar.container(key="chat_area")
+
+   Therefore Streamlit generates:
+       .st-key-chat_area
+*/
+
+section[data-testid="stSidebar"]
+.st-key-chat_area {
+
+    height: calc(100vh - 300px) !important;
+
+    max-height: calc(100vh - 300px) !important;
+
+    overflow-y: auto !important;
+
+    overflow-x: hidden !important;
+
+    box-sizing: border-box !important;
+
+    padding-right: 4px !important;
+
+    scrollbar-width: thin !important;
+
+    scrollbar-color: #cbd5e1 transparent !important;
+}
+
+
+/* ==========================================================================
+   CHAT SCROLLBAR — CHROME / EDGE
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-chat_area::-webkit-scrollbar {
+
+    width: 6px !important;
+}
+
+
+section[data-testid="stSidebar"]
+.st-key-chat_area::-webkit-scrollbar-track {
+
+    background: transparent !important;
+}
+
+
+section[data-testid="stSidebar"]
+.st-key-chat_area::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1 !important;
+
+    border-radius: 10px !important;
+}
+
+
+section[data-testid="stSidebar"]
+.st-key-chat_area::-webkit-scrollbar-thumb:hover {
+
+    background: #94a3b8 !important;
+}
+
+
+/* ==========================================================================
+   CHAT SECTION LABEL
+   ========================================================================== */
+
+.sidebar-section-label {
+
+    font-size: 0.75rem !important;
+
+    font-weight: 600 !important;
+
+    color: #64748b !important;
+
+    text-transform: uppercase !important;
+
+    letter-spacing: 0.04em !important;
+
+    margin-top: 0.8rem !important;
+
+    margin-bottom: 0.4rem !important;
+}
+
+
+/* ==========================================================================
+   CHAT LIST BUTTONS
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-chat_area
+.stButton > button {
+
+    text-align: left !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    border: 1px solid transparent !important;
+
+    background-color: transparent !important;
+
+    color: #374151 !important;
+
+    min-height: 38px !important;
+}
+
+
+section[data-testid="stSidebar"]
+.st-key-chat_area
+.stButton > button:hover {
+
+    background-color: #e5e7eb !important;
+
+    border-color: #d1d5db !important;
+}
+
+
+/* ==========================================================================
+   CHAT BUTTON TEXT
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-chat_area
+.stButton > button p {
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    white-space: nowrap !important;
+
+    margin: 0 !important;
+}
+
+
+/* ==========================================================================
+   5. FIXED BOTTOM SIDEBAR
+   ========================================================================== */
+
+/*
+   sidebar.py:
+
+       bottom = st.sidebar.container(
+           key="sidebar_bottom"
+       )
+
+   This container contains:
+
+       📂 Documents
+       🚪 Log out
+
+   It is positioned absolutely inside the sidebar.
+*/
+
+section[data-testid="stSidebar"]
+.st-key-sidebar_bottom {
+
+    position: absolute !important;
+
+    left: 0 !important;
+
+    right: 0 !important;
+
+    bottom: 0 !important;
+
     width: 100% !important;
+
+    background-color: #f1f5f9 !important;
+
+    padding: 0.55rem 0.75rem 0.75rem 0.75rem !important;
+
+    border-top: 1px solid #e2e8f0 !important;
+
+    z-index: 999999 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ==========================================================================
+   DOCUMENTS BUTTON
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-sidebar_bottom
+button[data-testid="stBaseButton-secondary"] {
+
+    width: 100% !important;
+
+    min-height: 40px !important;
+
+    background-color: #ffffff !important;
+
+    color: #374151 !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    border-radius: 10px !important;
+
+    font-size: 0.9rem !important;
+
+    text-align: left !important;
+}
+
+
+/* Documents hover */
+
+section[data-testid="stSidebar"]
+.st-key-sidebar_bottom
+button[data-testid="stBaseButton-secondary"]:hover {
+
+    background-color: #f8fafc !important;
+
+    border-color: #94a3b8 !important;
+}
+
+
+/* ==========================================================================
+   LOGOUT CONTAINER
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-logout_container {
+
+    width: 100% !important;
+
+    margin-top: 0.35rem !important;
+}
+
+
+/* ==========================================================================
+   LOGOUT BUTTON
+   ========================================================================== */
+
+section[data-testid="stSidebar"]
+.st-key-logout_container
+button {
+
+    width: 100% !important;
+
+    min-height: 40px !important;
+
+    background-color: #ffffff !important;
+
+    color: #374151 !important;
+
+    border: 1px solid #cbd5e1 !important;
+
+    border-radius: 10px !important;
+
+    font-size: 0.9rem !important;
+
+    text-align: left !important;
+}
+
+
+/* Logout hover */
+
+section[data-testid="stSidebar"]
+.st-key-logout_container
+button:hover {
+
+    background-color: #fef2f2 !important;
+
+    color: #b91c1c !important;
+
+    border-color: #fecaca !important;
+}
+
+
+/* ==========================================================================
+   6. SIDEBAR COLUMNS
+   ========================================================================== */
+
+/*
+   Prevent chat/document rows from overflowing.
+*/
+
+section[data-testid="stSidebar"]
+[data-testid="stHorizontalBlock"] {
+
+    gap: 0.3rem !important;
+
+    align-items: center !important;
+
+    width: 100% !important;
+
     flex-wrap: nowrap !important;
 }
 
-/* 2. Allow columns to shrink properly without pushing elements outside */
-section[data-testid="stSidebar"] [data-testid="column"] {
+
+/* Allow columns to shrink */
+
+section[data-testid="stSidebar"]
+[data-testid="column"] {
+
     min-width: 0 !important;
+
     padding: 0 !important;
 }
 
-/* 3. Style compact delete / action buttons in the sidebar */
-section[data-testid="stSidebar"] [data-testid="column"] .stButton > button {
-    width: 36px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    background: #ffffff !important;
-    box-shadow: none !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="column"] .stButton > button:hover {
-    background-color: #fef2f2 !important;
-    border-color: #fca5a5 !important;
-}
 
 /* ==========================================================================
-   PERFECT CENTERING FOR SIDEBAR ICON BUTTONS
+   SIDEBAR ICON / ACTION BUTTONS
    ========================================================================== */
 
-/* 1. Ensure the button itself acts as a flex container */
-section[data-testid="stSidebar"] [data-testid="column"] .stButton > button {
+section[data-testid="stSidebar"]
+[data-testid="column"]
+.stButton > button {
+
     width: 34px !important;
+
     height: 34px !important;
+
     min-height: 34px !important;
+
     max-height: 34px !important;
+
     padding: 0 !important;
+
     margin: 0 !important;
+
     display: inline-flex !important;
+
     align-items: center !important;
+
     justify-content: center !important;
+
     border-radius: 8px !important;
+
     border: 1px solid #e2e8f0 !important;
+
     background: #ffffff !important;
+
     box-shadow: none !important;
 }
 
-/* 2. Reset Streamlit's inner paragraph margins and line-heights */
-section[data-testid="stSidebar"] [data-testid="column"] .stButton > button * {
+
+/* Center icon/text */
+
+section[data-testid="stSidebar"]
+[data-testid="column"]
+.stButton > button * {
+
     margin: 0 !important;
+
     padding: 0 !important;
+
     line-height: 1 !important;
+
     display: flex !important;
+
     align-items: center !important;
+
     justify-content: center !important;
+
     font-size: 0.9rem !important;
 }
 
-/* 3. Hover state */
-section[data-testid="stSidebar"] [data-testid="column"] .stButton > button:hover {
+
+/* Icon hover */
+
+section[data-testid="stSidebar"]
+[data-testid="column"]
+.stButton > button:hover {
+
     background-color: #fef2f2 !important;
+
     border-color: #fca5a5 !important;
+}
+
+
+/* ==========================================================================
+   7. MAIN CONTENT — MOVE BESIDE SIDEBAR
+   ========================================================================== */
+
+section[data-testid="stMain"] {
+
+    margin-left: 280px !important;
+
+    width: calc(100vw - 280px) !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ==========================================================================
+   8. CHAT PAGE
+   ========================================================================== */
+
+/* Main chat page scrolling */
+
+.stApp:has(div[data-testid="stChatInput"])
+section[data-testid="stMain"] {
+
+    overflow-y: auto !important;
+
+    overflow-x: hidden !important;
+}
+
+
+/* Chat page container */
+
+.stApp:has(div[data-testid="stChatInput"])
+.main
+.block-container {
+
+    padding-top: 1.5rem !important;
+
+    padding-bottom: 5.5rem !important;
+}
+
+
+/* ==========================================================================
+   9. FIXED CHAT INPUT
+   ========================================================================== */
+
+/*
+   Chat input is centered relative to the available area
+   AFTER the 280px sidebar.
+*/
+
+div[data-testid="stHorizontalBlock"]:has(
+    div[data-testid="stChatInput"]
+) {
+
+    position: fixed !important;
+
+    bottom: 1.2rem !important;
+
+    left: calc(
+        280px + (100vw - 280px) / 2
+    ) !important;
+
+    transform: translateX(-50%) !important;
+
+    width: 90% !important;
+
+    max-width: 760px !important;
+
+    z-index: 9999 !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e2e8f0 !important;
+
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.08) !important;
+
+    padding: 0.2rem 0.5rem !important;
+
+    align-items: center !important;
+}
+
+
+/* ==========================================================================
+   CHAT INPUT INNER AREA
+   ========================================================================== */
+
+div[data-testid="stHorizontalBlock"]:has(
+    div[data-testid="stChatInput"]
+)
+div[data-testid="stChatInput"] {
+
+    border: none !important;
+
+    background: transparent !important;
+
+    padding: 0 !important;
+}
+
+
+div[data-testid="stHorizontalBlock"]:has(
+    div[data-testid="stChatInput"]
+)
+div[data-testid="stChatInput"] > div {
+
+    border: none !important;
+
+    box-shadow: none !important;
+
+    background: transparent !important;
+}
+
+
+/* ==========================================================================
+   CHAT INPUT PLUS / POPOVER BUTTON
+   ========================================================================== */
+
+div[data-testid="stHorizontalBlock"]:has(
+    div[data-testid="stChatInput"]
+)
+div[data-testid="stPopover"] button {
+
+    border: none !important;
+
+    background: #f1f5f9 !important;
+
+    border-radius: 50% !important;
+
+    width: 36px !important;
+
+    height: 36px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+}
+
+
+/* ==========================================================================
+   10. EMPTY STATE
+   ========================================================================== */
+
+.empty-state {
+
+    margin-top: 1.5rem !important;
+
+    text-align: left;
+}
+
+
+.empty-state h1 {
+
+    font-size: 1.8rem !important;
+
+    font-weight: 700 !important;
+
+    color: #0f172a !important;
+
+    margin-bottom: 0.3rem !important;
+}
+
+
+.empty-state p {
+
+    color: #64748b !important;
+
+    font-size: 0.95rem !important;
+
+    margin-bottom: 1rem !important;
+}
+
+
+/* ==========================================================================
+   EMPTY STATE PROMPTS
+   ========================================================================== */
+
+.empty-prompt-wrapper {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+
+    margin-top: 0.8rem;
+}
+
+
+.empty-prompt {
+
+    padding: 0.4rem 0.85rem;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+
+    border: 1px solid #cbd5e1;
+
+    color: #2563eb;
+
+    font-size: 0.85rem;
+
+    font-weight: 500;
+
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04);
 }

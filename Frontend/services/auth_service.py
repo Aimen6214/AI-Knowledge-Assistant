@@ -1,5 +1,5 @@
 import requests
-from config import API_URL
+from config import BASE_URL
 
 
 def register(name, email, password):

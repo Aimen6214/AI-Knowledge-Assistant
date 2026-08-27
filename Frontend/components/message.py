@@ -85,11 +85,20 @@ def render_message(message: dict, index: int = 0):
         if not is_user and sources:
             st.markdown("---")
             st.caption("📄 **Sources Referenced:**")
+            
+            # Divide source chips across up to 3 columns
             cols = st.columns(min(len(sources), 3))
+            
             for idx, s in enumerate(sources):
                 name = s.get("file_name", "Source Document")
-                page = s.get("page_number", "N/A")
-                cols[idx % 3].caption(f"📑 {name} *(Pg {page})*")
+                # Handle both 'page' and 'page_number' dictionary keys
+                page = s.get("page") or s.get("page_number") or "N/A"
+                # Extract file size
+                file_size = s.get("file_size") or s.get("size")
+                
+                size_badge = f" `({file_size})`" if file_size and file_size != "N/A" else ""
+                
+                cols[idx % 3].caption(f"📑 **{name}**{size_badge} — *(Pg {page})*")
 
         # Action Buttons (Copy & Reply) with equal proportional width
         col_copy, col_reply, _ = st.columns([1.2, 1.2, 5])

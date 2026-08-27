@@ -2,7 +2,7 @@ from models.doc_chunks import DocChunk
 from sqlalchemy.orm import Session
 
 def save_chunks_to_db(chunks, document_id, db: Session):
-    for index, chunk in enumerate(chunks):
+    for index, chunk in enumerate(chunks, start=1):
         new_chunk = DocChunk(
             document_id=document_id,
             content=chunk.page_content,

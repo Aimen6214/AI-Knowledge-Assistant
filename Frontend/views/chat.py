@@ -54,7 +54,7 @@ def chat_page():
             st.session_state.messages = conversation["messages"]
             st.session_state.reply_to = None
             st.session_state.last_prompt = None
-            st.query_params["cid"] = conversation["id"]  # 👈 Save active chat to URL
+            st.query_params["cid"] = conversation["id"]  #Save active chat to URL
         st.rerun()
 
     # -------------------------------------------------------------------------
